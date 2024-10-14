@@ -3,13 +3,30 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import useWebSocket from './services/WebSocketClient';
 
 console.log('React application starting...');
+
+function AppWithWebSocket() {
+  const { isConnected, lastMessage, error } = useWebSocket('/ws');
+
+  React.useEffect(() => {
+    console.log('[WebSocket] Connection status:', isConnected ? 'Connected' : 'Disconnected');
+    if (error) {
+      console.error('[WebSocket] Error:', error);
+    }
+    if (lastMessage) {
+      console.log('[WebSocket] Last message:', lastMessage);
+    }
+  }, [isConnected, lastMessage, error]);
+
+  return <App />;
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <AppWithWebSocket />
   </React.StrictMode>
 );
 

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://40.65.104.185:8080/api';
+const API_URL = 'http://localhost:8080/api';
 
 console.log('API URL:', API_URL);
 

@@ -1,59 +1,78 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Heading, VStack, HStack, Text, Button, useColorModeValue } from '@chakra-ui/react';
-import axios from 'axios';
+import api from '../../services/api';
+import WebSocketClient from '../../services/WebSocketClient';
 
 const Dashboard = () => {
   const [pendingAgreements, setPendingAgreements] = useState([]);
   const [recentAgreements, setRecentAgreements] = useState([]);
-  const bgColor = useColorModeValue('gray.100', 'gray.700');
+
+  const { isConnected, lastMessage } = WebSocketClient('/ws');
+
+  const fetchAgreements = async () => {
+    try {
+      const pendingResponse = await api.get('/agreements?status=pending');
+      setPendingAgreements(pendingResponse.data);
+
+      const recentResponse = await api.get('/agreements?limit=5');
+      setRecentAgreements(recentResponse.data);
+    } catch (error) {
+      console.error('Error fetching agreements:', error);
+    }
+  };
 
   useEffect(() => {
-    // Fetch pending and recent agreements
-    const fetchAgreements = async () => {
-      try {
-        const pendingResponse = await axios.get('/api/agreements?status=pending');
-        setPendingAgreements(pendingResponse.data);
-
-        const recentResponse = await axios.get('/api/agreements?limit=5');
-        setRecentAgreements(recentResponse.data);
-      } catch (error) {
-        console.error('Error fetching agreements:', error);
-      }
-    };
-
     fetchAgreements();
   }, []);
 
+  useEffect(() => {
+    if (isConnected) {
+      console.log('WebSocket connected successfully');
+    } else {
+      console.log('WebSocket disconnected');
+    }
+  }, [isConnected]);
+
+  useEffect(() => {
+    if (lastMessage) {
+      console.log('Received WebSocket message:', lastMessage);
+      const message = JSON.parse(lastMessage);
+      if (message.type === 'AGREEMENT_UPDATE') {
+        fetchAgreements();
+      }
+    }
+  }, [lastMessage]);
+
   return (
-    <Box p={5}>
-      <Heading mb={6}>Participant Dashboard</Heading>
-      <HStack spacing={8} align="start">
-        <VStack align="stretch" flex={1} spacing={4}>
-          <Heading size="md">Pending Agreements</Heading>
+    <div style={{ padding: '20px' }}>
+      <h1 style={{ marginBottom: '24px' }}>Participant Dashboard</h1>
+      <p style={{ marginBottom: '16px' }}>WebSocket Status: {isConnected ? 'Connected' : 'Disconnected'}</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ flex: 1, marginRight: '16px' }}>
+          <h2 style={{ marginBottom: '16px' }}>Pending Agreements</h2>
           {pendingAgreements.map((agreement) => (
-            <Box key={agreement.id} p={3} bg={bgColor} borderRadius="md">
-              <Text fontWeight="bold">{agreement.name}</Text>
-              <Text fontSize="sm">Status: {agreement.status}</Text>
-              <Button size="sm" colorScheme="blue" mt={2}>
+            <div key={agreement.id} style={{ padding: '12px', backgroundColor: '#f0f0f0', borderRadius: '4px', marginBottom: '8px' }}>
+              <p style={{ fontWeight: 'bold' }}>{agreement.name}</p>
+              <p style={{ fontSize: '14px' }}>Status: {agreement.status}</p>
+              <button style={{ marginTop: '8px', padding: '4px 8px', backgroundColor: '#3182ce', color: 'white', border: 'none', borderRadius: '4px' }}>
                 View Details
-              </Button>
-            </Box>
+              </button>
+            </div>
           ))}
-        </VStack>
-        <VStack align="stretch" flex={1} spacing={4}>
-          <Heading size="md">Recent Agreements</Heading>
+        </div>
+        <div style={{ flex: 1 }}>
+          <h2 style={{ marginBottom: '16px' }}>Recent Agreements</h2>
           {recentAgreements.map((agreement) => (
-            <Box key={agreement.id} p={3} bg={bgColor} borderRadius="md">
-              <Text fontWeight="bold">{agreement.name}</Text>
-              <Text fontSize="sm">Status: {agreement.status}</Text>
-              <Button size="sm" colorScheme="green" mt={2}>
+            <div key={agreement.id} style={{ padding: '12px', backgroundColor: '#f0f0f0', borderRadius: '4px', marginBottom: '8px' }}>
+              <p style={{ fontWeight: 'bold' }}>{agreement.name}</p>
+              <p style={{ fontSize: '14px' }}>Status: {agreement.status}</p>
+              <button style={{ marginTop: '8px', padding: '4px 8px', backgroundColor: '#38a169', color: 'white', border: 'none', borderRadius: '4px' }}>
                 View Agreement
-              </Button>
-            </Box>
+              </button>
+            </div>
           ))}
-        </VStack>
-      </HStack>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 };
 
