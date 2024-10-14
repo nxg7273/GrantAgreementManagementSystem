@@ -20,6 +20,12 @@ public class Participant {
     @Column(nullable = false)
     private String organization;
 
+    @Column(nullable = false)
+    private boolean emailNotificationsEnabled = true;
+
+    @Column(nullable = false)
+    private boolean inAppNotificationsEnabled = true;
+
     @OneToMany(mappedBy = "participant")
     private Set<Agreement> agreements;
 
@@ -55,6 +61,22 @@ public class Participant {
 
     public void setOrganization(String organization) {
         this.organization = organization;
+    }
+
+    public boolean isEmailNotificationsEnabled() {
+        return emailNotificationsEnabled;
+    }
+
+    public void setEmailNotificationsEnabled(boolean emailNotificationsEnabled) {
+        this.emailNotificationsEnabled = emailNotificationsEnabled;
+    }
+
+    public boolean isInAppNotificationsEnabled() {
+        return inAppNotificationsEnabled;
+    }
+
+    public void setInAppNotificationsEnabled(boolean inAppNotificationsEnabled) {
+        this.inAppNotificationsEnabled = inAppNotificationsEnabled;
     }
 
     public Set<Agreement> getAgreements() {

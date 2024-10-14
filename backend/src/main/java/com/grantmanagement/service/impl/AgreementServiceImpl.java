@@ -94,10 +94,10 @@ public class AgreementServiceImpl implements AgreementService {
         Optional<Agreement> agreement = agreementRepository.findById(id);
         if (agreement.isPresent()) {
             Agreement existingAgreement = agreement.get();
-            existingAgreement.setStatus("SIGNED");
+            existingAgreement.setStatus(Agreement.AgreementStatus.ACCEPTED);
             existingAgreement = agreementRepository.save(existingAgreement);
             generateAndSaveDocument(existingAgreement);
-            notificationService.sendAgreementSignedNotification(existingAgreement);
+            notificationService.sendAgreementSignedNotification(existingAgreement, existingAgreement.getParticipant());
             return existingAgreement;
         }
         return null;
@@ -108,9 +108,9 @@ public class AgreementServiceImpl implements AgreementService {
         Optional<Agreement> agreement = agreementRepository.findById(id);
         if (agreement.isPresent()) {
             Agreement existingAgreement = agreement.get();
-            existingAgreement.setStatus("REJECTED");
+            existingAgreement.setStatus(Agreement.AgreementStatus.REJECTED);
             existingAgreement = agreementRepository.save(existingAgreement);
-            notificationService.sendAgreementRejectionNotification(existingAgreement);
+            notificationService.sendAgreementRejectedNotification(existingAgreement, existingAgreement.getParticipant());
             return existingAgreement;
         }
         return null;
@@ -121,7 +121,7 @@ public class AgreementServiceImpl implements AgreementService {
         Optional<Agreement> agreement = agreementRepository.findById(id);
         if (agreement.isPresent()) {
             Agreement existingAgreement = agreement.get();
-            existingAgreement.setStatus("REGENERATED");
+            existingAgreement.setStatus(Agreement.AgreementStatus.PENDING);
             existingAgreement = agreementRepository.save(existingAgreement);
             checkAndApplyAutoAcceptance(existingAgreement);
             return existingAgreement;
@@ -133,7 +133,7 @@ public class AgreementServiceImpl implements AgreementService {
         Grant grant = agreement.getGrant();
         if (grant.isAutoAcceptanceEnabled() &&
             LocalDateTime.now().isAfter(agreement.getCreatedAt().plusDays(grant.getAutoAcceptanceDays()))) {
-            agreement.setStatus("ACCEPTED");
+            agreement.setStatus(Agreement.AgreementStatus.ACCEPTED);
             agreement.setAcceptedAt(LocalDateTime.now());
             agreementRepository.save(agreement);
             signAgreement(agreement.getId());

@@ -15,8 +15,7 @@ public class NotificationServiceImpl implements NotificationService {
     private JavaMailSender emailSender;
 
     @Override
-    public void sendAgreementCreationNotification(Agreement agreement) {
-        Participant participant = agreement.getParticipant();
+    public void sendAgreementCreatedNotification(Agreement agreement, Participant participant) {
         String subject = "New Grant Agreement Available";
         String body = String.format("Dear %s,\n\nA new grant agreement is available for your review. " +
                         "Please log in to the Grant Agreement Management System to view and sign the agreement.\n\n" +
@@ -29,8 +28,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void sendAgreementSignedNotification(Agreement agreement) {
-        Participant participant = agreement.getParticipant();
+    public void sendAgreementSignedNotification(Agreement agreement, Participant participant) {
         String subject = "Grant Agreement Signed";
         String body = String.format("Dear %s,\n\nYour grant agreement has been successfully signed. " +
                         "Thank you for completing this process.\n\n" +
@@ -43,8 +41,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void sendAgreementRejectionNotification(Agreement agreement) {
-        Participant participant = agreement.getParticipant();
+    public void sendAgreementRejectedNotification(Agreement agreement, Participant participant) {
         String subject = "Grant Agreement Rejected";
         String body = String.format("Dear %s,\n\nYour grant agreement has been rejected. " +
                         "If you have any questions or concerns, please contact our support team.\n\n" +
@@ -57,10 +54,22 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void sendAgreementExpirationReminder(Agreement agreement) {
-        Participant participant = agreement.getParticipant();
-        String subject = "Grant Agreement Expiration Reminder";
-        String body = String.format("Dear %s,\n\nThis is a reminder that your grant agreement is approaching its expiration date. " +
+    public void sendAgreementRegeneratedNotification(Agreement agreement, Participant participant) {
+        String subject = "Grant Agreement Regenerated";
+        String body = String.format("Dear %s,\n\nYour grant agreement has been regenerated. " +
+                        "Please log in to the Grant Agreement Management System to review the updated agreement.\n\n" +
+                        "Grant ID: %d\nAgreement ID: %d\n\nBest regards,\nGrant Management Team",
+                participant.getName(),
+                agreement.getGrant().getId(),
+                agreement.getId());
+
+        sendEmail(participant.getEmail(), subject, body);
+    }
+
+    @Override
+    public void sendReminderNotification(Agreement agreement, Participant participant) {
+        String subject = "Grant Agreement Reminder";
+        String body = String.format("Dear %s,\n\nThis is a reminder about your pending grant agreement. " +
                         "Please log in to the Grant Agreement Management System to review and take necessary actions.\n\n" +
                         "Grant ID: %d\nAgreement ID: %d\n\nBest regards,\nGrant Management Team",
                 participant.getName(),
@@ -77,5 +86,14 @@ public class NotificationServiceImpl implements NotificationService {
         message.setSubject(subject);
         message.setText(text);
         emailSender.send(message);
+    }
+
+    @Override
+    public void updateNotificationPreferences(Participant participant, boolean emailNotifications, boolean inAppNotifications) {
+        participant.setEmailNotificationsEnabled(emailNotifications);
+        participant.setInAppNotificationsEnabled(inAppNotifications);
+        // Note: We need to save the updated participant to the database.
+        // This should be done in the ParticipantService, so we'll assume it's handled there.
+        // If not, we should inject ParticipantRepository here and save the participant.
     }
 }

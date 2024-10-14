@@ -8,7 +8,7 @@ sudo apt-get upgrade -y
 sudo apt-get install -y openjdk-11-jdk
 
 # Install Node.js and npm
-curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
 # Install MySQL
@@ -20,15 +20,25 @@ sudo apt-get install -y maven
 # Install Git
 sudo apt-get install -y git
 
-# Clone the project repository (replace with actual repository URL)
-git clone https://github.com/your-org/grant-agreement-system.git
+# Navigate to the project root directory
+cd /home/ubuntu/GrantAgreementManagementSystem
 
 # Set up backend
-cd grant-agreement-system/backend
-mvn clean install
+if [ -d "backend" ]; then
+    cd backend
+    mvn clean install
+    cd ..
+else
+    echo "Backend directory not found. Please check the project structure."
+fi
 
 # Set up frontend
-cd ../frontend
-npm install
+if [ -d "frontend" ]; then
+    cd frontend
+    npm install
+    cd ..
+else
+    echo "Frontend directory not found. Please check the project structure."
+fi
 
 echo "Development environment setup complete!"

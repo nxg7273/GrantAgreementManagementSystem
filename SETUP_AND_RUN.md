@@ -6,37 +6,40 @@ This document provides step-by-step instructions on how to set up and run the Gr
 
 Ensure you have the following installed on your system:
 
-1. Java Development Kit (JDK) 11 or later
-2. Node.js and npm (for React frontend)
-3. MySQL Server
-4. Maven (for building the Spring Boot backend)
+1. Java Development Kit (JDK) 17 or later
+2. Node.js 20.x or later and npm
+3. MySQL Server 8.0 or later
+4. Maven 3.6 or later (for building the Spring Boot backend)
 
 ## Database Setup
 
 1. Start your MySQL server.
-2. Create a new database:
+2. Create a new database and user:
    ```
    mysql -u root -p
    CREATE DATABASE grant_management;
-   USE grant_management;
+   CREATE USER 'grantuser'@'localhost' IDENTIFIED BY 'grantpassword';
+   GRANT ALL PRIVILEGES ON grant_management.* TO 'grantuser'@'localhost';
+   FLUSH PRIVILEGES;
+   EXIT;
    ```
 3. Run the SQL scripts to create tables and insert sample data:
    ```
-   mysql -u root -p grant_management < create_tables.sql
-   mysql -u root -p grant_management < insert_sample_data.sql
+   mysql -u grantuser -pgrantpassword grant_management < create_tables.sql
+   mysql -u grantuser -pgrantpassword grant_management < insert_sample_data.sql
    ```
 
 ## Backend Setup (Java Spring Boot)
 
 1. Navigate to the backend directory:
    ```
-   cd /path/to/grant-agreement-system/backend
+   cd /path/to/GrantAgreementManagementSystem/backend
    ```
-2. Update the `src/main/resources/application.properties` file with your MySQL credentials:
+2. Update the `src/main/resources/application.properties` file with your MySQL credentials if different from the setup above:
    ```
    spring.datasource.url=jdbc:mysql://localhost:3306/grant_management
-   spring.datasource.username=your_username
-   spring.datasource.password=your_password
+   spring.datasource.username=grantuser
+   spring.datasource.password=grantpassword
    ```
 3. Build the project:
    ```
@@ -52,17 +55,13 @@ Ensure you have the following installed on your system:
 
 1. Navigate to the frontend directory:
    ```
-   cd /path/to/grant-agreement-system/frontend
+   cd /path/to/GrantAgreementManagementSystem/frontend
    ```
 2. Install dependencies:
    ```
    npm install
    ```
-3. Update the API base URL in `src/config.js` if necessary:
-   ```javascript
-   export const API_BASE_URL = 'http://localhost:8080/api';
-   ```
-4. Start the development server:
+3. Start the development server:
    ```
    npm start
    ```
@@ -79,10 +78,16 @@ The backend already includes Apache PDFBox and Java Signature API dependencies. 
 3. Start the frontend development server as described in the "Frontend Setup" section.
 4. Access the application by navigating to `http://localhost:3000` in your web browser.
 
+## Note on the "grant-agreement-system" Directory
+
+The "grant-agreement-system" directory contains an alternative or older version of the backend system implemented using Spring Boot. It is not required for the current setup and can be considered as a reference or backup implementation. The main application uses the "backend" directory for its server-side logic.
+
 ## Troubleshooting
 
 - If you encounter database connection issues, verify your MySQL credentials and ensure the server is running.
 - For backend build failures, check that you have the correct version of JDK and Maven installed.
-- If the frontend fails to connect to the backend, verify that the backend is running and the API_BASE_URL is set correctly in the frontend configuration.
+- If the frontend fails to connect to the backend, verify that the backend is running and the API base URL is set correctly in the frontend configuration.
+- For any npm-related issues in the frontend setup, try deleting the `node_modules` folder and running `npm install` again.
+- If you face any port conflicts, you can modify the port numbers in `application.properties` for the backend and in the `package.json` scripts for the frontend.
 
 For any persistent issues, please refer to the project documentation or contact the development team.

@@ -27,21 +27,21 @@ public class AutoAcceptanceServiceImpl implements AutoAcceptanceService {
 
     @Override
     @Scheduled(cron = "0 0 * * * *") // Run every hour
-    public void processAutoAcceptance() {
-        List<Agreement> pendingAgreements = agreementRepository.findByStatus("PENDING");
+    public void checkAndApplyAutoAcceptance() {
+        List<Agreement> pendingAgreements = agreementRepository.findByStatus(Agreement.AgreementStatus.PENDING);
 
         for (Agreement agreement : pendingAgreements) {
             Grant grant = agreement.getGrant();
             if (grant.isAutoAcceptanceEnabled() &&
                 LocalDateTime.now().isAfter(agreement.getCreatedAt().plusDays(grant.getAutoAcceptanceDays()))) {
 
-                agreement.setStatus("ACCEPTED");
+                agreement.setStatus(Agreement.AgreementStatus.ACCEPTED);
                 agreement.setAcceptedAt(LocalDateTime.now());
                 agreementRepository.save(agreement);
 
                 agreementService.signAgreement(agreement.getId());
 
-                notificationService.sendAgreementSignedNotification(agreement);
+                notificationService.sendAgreementSignedNotification(agreement, agreement.getParticipant());
             }
         }
     }

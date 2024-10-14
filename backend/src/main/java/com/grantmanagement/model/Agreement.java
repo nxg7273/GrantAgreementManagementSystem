@@ -32,6 +32,9 @@ public class Agreement {
     @Column
     private String documentPath;
 
+    @Column
+    private LocalDateTime acceptedAt;
+
     public enum AgreementStatus {
         PENDING, ACCEPTED, REJECTED
     }
@@ -92,5 +95,13 @@ public class Agreement {
 
     public void setDocumentPath(String documentPath) {
         this.documentPath = documentPath;
+    }
+
+    public LocalDateTime getAcceptedAt() {
+        return acceptedAt;
+    }
+
+    public void setAcceptedAt(LocalDateTime acceptedAt) {
+        this.acceptedAt = acceptedAt;
     }
 }
