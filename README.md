@@ -34,7 +34,7 @@ Before you begin, ensure you have the following installed:
    mvn spring-boot:run
    ```
 
-The backend server should now be running on `http://localhost:8080`.
+The backend server should now be running on `http://localhost:8081`.
 
 ## Frontend Setup
 
@@ -48,7 +48,12 @@ The backend server should now be running on `http://localhost:8080`.
    npm install
    ```
 
-3. Start the development server:
+3. Configure the .env file for the frontend:
+   ```
+   REACT_APP_BACKEND_URL=http://localhost:8081
+   ```
+
+4. Start the development server:
    ```
    npm start
    ```
@@ -74,6 +79,10 @@ The system uses Apache PDFBox for PDF generation. This library is included as a 
 
 The system uses the Java Signature API for digital signatures. This is part of the Java standard library, so no additional setup is required.
 
+### WebSocket Functionality
+
+The system includes WebSocket functionality for real-time updates. Ensure that the WebSocket server is running and accessible at the backend URL specified in the .env file.
+
 ## Running the Application
 
 1. Start the MySQL server.
@@ -86,6 +95,7 @@ The system uses the Java Signature API for digital signatures. This is part of t
 If you encounter any issues:
 1. Ensure all prerequisites are correctly installed.
 2. Check that the database connection details in `application.properties` are correct.
-3. Verify that the required ports (8080 for backend, 3000 for frontend) are not in use by other applications.
+3. Verify that the required ports (8081 for backend, 3000 for frontend) are not in use by other applications.
+4. Ensure the WebSocket connection is established by checking the console logs for connection status.
 
 For any persistent problems, please refer to the project documentation or contact the development team.
