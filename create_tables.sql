@@ -30,3 +30,13 @@ CREATE TABLE IF NOT EXISTS agreement (
     FOREIGN KEY (grant_id) REFERENCES `grant`(id),
     FOREIGN KEY (participant_id) REFERENCES participant(id)
 );
+
+-- Create User table
+CREATE TABLE IF NOT EXISTS user (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+
+-- Insert test user
+INSERT IGNORE INTO user (username, password) VALUES ('testuser_1729221017@example.com', '$2a$10$r88SZZ.qxcJ4dn3tOthjbeY7xx.ywmENXuEXCQRMjjZKLaLFWWJT6');
