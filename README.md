@@ -1,5 +1,7 @@
 # Grant Agreement Management System
 
+A comprehensive system for managing grant agreements, including document generation and digital signatures.
+
 This README provides instructions on how to set up and run the Grant Agreement Management System. The system consists of a Java Spring Boot backend, a ReactJS frontend, and uses a MySQL database.
 
 ## Prerequisites
