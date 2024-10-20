@@ -1,12 +1,18 @@
 package com.grantmanagement.controller;
 
 import com.grantmanagement.security.JwtTokenUtil;
+import com.grantmanagement.service.UserService;
+import com.grantmanagement.model.User;
+import com.grantmanagement.dto.SignupRequest;
+import com.grantmanagement.dto.LoginRequest;
+import com.grantmanagement.dto.JwtResponse;
+import com.grantmanagement.dto.MessageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,44 +29,30 @@ public class AuthController {
     private JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private UserService userService;
 
-    @PostMapping("/login")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
-        authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
-        final String token = jwtTokenUtil.generateToken(userDetails);
-        return ResponseEntity.ok(new JwtResponse(token));
+    @PostMapping("/signup")
+    public ResponseEntity<?> registerUser(@RequestBody SignupRequest signupRequest) {
+        User user = userService.registerUser(signupRequest);
+        return ResponseEntity.ok().body(new MessageResponse("User registered successfully!"));
     }
 
-    private void authenticate(String username, String password) throws Exception {
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        } catch (Exception e) {
-            throw new Exception("Invalid username or password", e);
-        }
-    }
-}
-
-class JwtRequest {
-    private String username;
-    private String password;
-
-    // getters and setters
-    public String getUsername() { return username; }
-    void setUsername(String username) { this.username = username; }
-    public String getPassword() { return password; }
-    void setPassword(String password) { this.password = password; }
-}
-
-class JwtResponse {
-    private final String token;
-
-    public JwtResponse(String token) {
-        this.token = token;
+    @PostMapping("/signin")
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtTokenUtil.generateToken(authentication);
+        return ResponseEntity.ok(new JwtResponse(jwt));
     }
 
-    public String getToken() {
-        return token;
+    // Temporary endpoint to update testuser password
+    @PostMapping("/update-testuser-password")
+    public ResponseEntity<?> updateTestUserPassword() {
+        userService.updateUserPassword("testuser", "newTestPassword");
+        return ResponseEntity.ok(new MessageResponse("Testuser password updated successfully"));
     }
 }
+
+// Remove the duplicate JwtRequest and UserRegistrationRequest classes as they are now in separate DTO files
