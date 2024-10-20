@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Heading, Text, VStack, HStack, Button, useToast } from '@chakra-ui/react';
 import axios from 'axios';
 
@@ -6,11 +6,7 @@ const AgreementDetails = ({ agreementId }) => {
   const [agreement, setAgreement] = useState(null);
   const toast = useToast();
 
-  useEffect(() => {
-    fetchAgreementDetails();
-  }, [agreementId]);
-
-  const fetchAgreementDetails = async () => {
+  const fetchAgreementDetails = useCallback(async () => {
     try {
       const response = await axios.get(`/api/agreements/${agreementId}`);
       setAgreement(response.data);
@@ -24,7 +20,11 @@ const AgreementDetails = ({ agreementId }) => {
         isClosable: true,
       });
     }
-  };
+  }, [agreementId, toast]);
+
+  useEffect(() => {
+    fetchAgreementDetails();
+  }, [fetchAgreementDetails]);
 
   const handleAccept = async () => {
     try {

@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -33,10 +33,10 @@ public class AutoAcceptanceServiceImpl implements AutoAcceptanceService {
         for (Agreement agreement : pendingAgreements) {
             Grant grant = agreement.getGrant();
             if (grant.isAutoAcceptanceEnabled() &&
-                LocalDateTime.now().isAfter(agreement.getCreatedAt().plusDays(grant.getAutoAcceptanceDays()))) {
+                LocalDate.now().isAfter(agreement.getCreatedAt().plusDays(grant.getAutoAcceptanceDays()))) {
 
                 agreement.setStatus(Agreement.AgreementStatus.ACCEPTED);
-                agreement.setAcceptedAt(LocalDateTime.now());
+                agreement.setAcceptedAt(LocalDate.now());
                 agreementRepository.save(agreement);
 
                 agreementService.signAgreement(agreement.getId());

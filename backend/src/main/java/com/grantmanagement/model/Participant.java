@@ -26,8 +26,15 @@ public class Participant {
     @Column(nullable = false)
     private boolean inAppNotificationsEnabled = true;
 
-    @OneToMany(mappedBy = "participant")
+    @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Agreement> agreements;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "grant_id")
+    private Grant grant;
+
+    @Column(nullable = false)
+    private String phoneNumber;
 
     // Getters and setters
 
@@ -85,5 +92,21 @@ public class Participant {
 
     public void setAgreements(Set<Agreement> agreements) {
         this.agreements = agreements;
+    }
+
+    public Grant getGrant() {
+        return grant;
+    }
+
+    public void setGrant(Grant grant) {
+        this.grant = grant;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

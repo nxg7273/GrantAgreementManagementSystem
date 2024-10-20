@@ -12,4 +12,5 @@ public interface NotificationService {
     void sendAgreementRegeneratedNotification(Agreement agreement, Participant participant);
     void sendReminderNotification(Agreement agreement, Participant participant);
     void updateNotificationPreferences(Participant participant, boolean emailNotifications, boolean inAppNotifications);
+    void sendDocumentSigningNotification(Agreement agreement);
 }

@@ -11,4 +11,5 @@ public interface AgreementRepository extends JpaRepository<Agreement, Long> {
     List<Agreement> findByParticipantId(Long participantId);
     List<Agreement> findByGrantId(Long grantId);
     List<Agreement> findByStatus(Agreement.AgreementStatus status);
+    long countByStatus(Agreement.AgreementStatus status);
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Heading, VStack, HStack, Table, Thead, Tbody, Tr, Th, Td, Button, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, FormControl, FormLabel, Input, Textarea, useDisclosure, useToast } from '@chakra-ui/react';
 import axios from 'axios';
 
@@ -8,11 +8,7 @@ const GrantManagement = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
-  useEffect(() => {
-    fetchGrants();
-  }, []);
-
-  const fetchGrants = async () => {
+  const fetchGrants = useCallback(async () => {
     try {
       const response = await axios.get('/api/admin/grants');
       setGrants(response.data);
@@ -26,7 +22,11 @@ const GrantManagement = () => {
         isClosable: true,
       });
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchGrants();
+  }, [fetchGrants]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

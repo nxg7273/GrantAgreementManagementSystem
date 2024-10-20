@@ -1,12 +1,14 @@
 package com.grantmanagement.controller;
 
-import com.grantmanagement.model.Participant;
+import com.grantmanagement.dto.ParticipantDTO;
 import com.grantmanagement.service.ParticipantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/participants")
@@ -20,27 +22,27 @@ public class ParticipantController {
     }
 
     @PostMapping
-    public ResponseEntity<Participant> createParticipant(@RequestBody Participant participant) {
-        Participant createdParticipant = participantService.createParticipant(participant);
+    public ResponseEntity<ParticipantDTO> createParticipant(@RequestBody ParticipantDTO participantDTO) {
+        ParticipantDTO createdParticipant = participantService.createParticipant(participantDTO);
         return ResponseEntity.ok(createdParticipant);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Participant> getParticipantById(@PathVariable Long id) {
+    public ResponseEntity<ParticipantDTO> getParticipantById(@PathVariable Long id) {
         return participantService.getParticipantById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
-    public ResponseEntity<List<Participant>> getAllParticipants() {
-        List<Participant> participants = participantService.getAllParticipants();
+    public ResponseEntity<List<ParticipantDTO>> getAllParticipants() {
+        List<ParticipantDTO> participants = participantService.getAllParticipants();
         return ResponseEntity.ok(participants);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Participant> updateParticipant(@PathVariable Long id, @RequestBody Participant participantDetails) {
-        Participant updatedParticipant = participantService.updateParticipant(id, participantDetails);
+    public ResponseEntity<ParticipantDTO> updateParticipant(@PathVariable Long id, @RequestBody ParticipantDTO participantDetails) {
+        ParticipantDTO updatedParticipant = participantService.updateParticipant(id, participantDetails);
         if (updatedParticipant != null) {
             return ResponseEntity.ok(updatedParticipant);
         }
@@ -54,21 +56,39 @@ public class ParticipantController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Participant>> searchParticipants(@RequestParam String keyword) {
-        List<Participant> participants = participantService.searchParticipants(keyword);
+    public ResponseEntity<List<ParticipantDTO>> searchParticipants(@RequestParam String keyword) {
+        List<ParticipantDTO> participants = participantService.searchParticipants(keyword);
         return ResponseEntity.ok(participants);
     }
 
     @GetMapping("/email/{email}")
-    public ResponseEntity<Participant> getParticipantByEmail(@PathVariable String email) {
+    public ResponseEntity<ParticipantDTO> getParticipantByEmail(@PathVariable String email) {
         return participantService.getParticipantByEmail(email)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/organization/{organization}")
-    public ResponseEntity<List<Participant>> getParticipantsByOrganization(@PathVariable String organization) {
-        List<Participant> participants = participantService.getParticipantsByOrganization(organization);
+    public ResponseEntity<List<ParticipantDTO>> getParticipantsByOrganization(@PathVariable String organization) {
+        List<ParticipantDTO> participants = participantService.getParticipantsByOrganization(organization);
         return ResponseEntity.ok(participants);
+    }
+
+    @GetMapping("/total")
+    public ResponseEntity<Long> getTotalParticipants() {
+        long totalParticipants = participantService.getTotalParticipants();
+        return ResponseEntity.ok(totalParticipants);
+    }
+
+    @GetMapping("/grant/{grantId}")
+    public ResponseEntity<List<ParticipantDTO>> getParticipantsByGrantId(@PathVariable Long grantId) {
+        List<ParticipantDTO> participants = participantService.getParticipantsByGrantId(grantId);
+        return ResponseEntity.ok(participants);
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<Map<String, Object>> getParticipantDashboard() {
+        Map<String, Object> dashboardData = participantService.getParticipantDashboardData();
+        return ResponseEntity.ok(dashboardData);
     }
 }

@@ -1,45 +1,29 @@
-package com.grantmanagement.model;
+package com.grantmanagement.dto;
 
-import javax.persistence.*;
+import com.grantmanagement.model.Agreement.AgreementStatus;
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "agreements")
-public class Agreement {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class AgreementDTO {
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "grant_id", nullable = false)
-    private Grant grant;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "participant_id", nullable = false)
-    private Participant participant;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    private GrantDTO grant;
+    private ParticipantDTO participant;
     private AgreementStatus status;
-
-    @Column(nullable = false)
     private LocalDate createdAt;
-
-    @Column
     private LocalDate updatedAt;
-
-    @Column
     private String documentPath;
-
-    @Column
     private LocalDate acceptedAt;
 
-    @Column
-    private LocalDate expiresAt;
-
-    public enum AgreementStatus {
-        PENDING, ACCEPTED, REJECTED
+    public AgreementDTO(Long id, GrantDTO grant, ParticipantDTO participant, AgreementStatus status,
+                        LocalDate createdAt, LocalDate updatedAt, String documentPath,
+                        LocalDate acceptedAt) {
+        this.id = id;
+        this.grant = grant;
+        this.participant = participant;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.documentPath = documentPath;
+        this.acceptedAt = acceptedAt;
     }
 
     // Getters and setters
@@ -52,19 +36,19 @@ public class Agreement {
         this.id = id;
     }
 
-    public Grant getGrant() {
+    public GrantDTO getGrant() {
         return grant;
     }
 
-    public void setGrant(Grant grant) {
+    public void setGrant(GrantDTO grant) {
         this.grant = grant;
     }
 
-    public Participant getParticipant() {
+    public ParticipantDTO getParticipant() {
         return participant;
     }
 
-    public void setParticipant(Participant participant) {
+    public void setParticipant(ParticipantDTO participant) {
         this.participant = participant;
     }
 
@@ -106,13 +90,5 @@ public class Agreement {
 
     public void setAcceptedAt(LocalDate acceptedAt) {
         this.acceptedAt = acceptedAt;
-    }
-
-    public LocalDate getExpiresAt() {
-        return expiresAt;
-    }
-
-    public void setExpiresAt(LocalDate expiresAt) {
-        this.expiresAt = expiresAt;
     }
 }

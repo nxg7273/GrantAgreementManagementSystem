@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 
-const useWebSocket = (path) => {
+const useWebSocket = () => {
   const [client, setClient] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState(null);
@@ -10,9 +10,34 @@ const useWebSocket = (path) => {
   const isDisconnectingRef = useRef(false);
   const stompClientRef = useRef(null);
 
+  const disconnect = useCallback(() => {
+    if (isDisconnectingRef.current) {
+      console.log('[WebSocket] Already disconnecting, skipping redundant call');
+      return Promise.resolve();
+    }
+    isDisconnectingRef.current = true;
+
+    return new Promise((resolve) => {
+      if (stompClientRef.current && stompClientRef.current.connected) {
+        console.log('[WebSocket] Manually disconnecting');
+        stompClientRef.current.disconnect(() => {
+          console.log('[WebSocket] Disconnected');
+          setIsConnected(false);
+          setClient(null);
+          stompClientRef.current = null;
+          isDisconnectingRef.current = false;
+          resolve();
+        });
+      } else {
+        isDisconnectingRef.current = false;
+        resolve();
+      }
+    });
+  }, []);
+
   const connectWebSocket = useCallback((token) => {
     try {
-      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8080';
+      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
       console.log('[WebSocket] BACKEND_URL:', BACKEND_URL);
       const wsUrl = `${BACKEND_URL}/ws`;
       console.log('[WebSocket] Attempting to connect to WebSocket:', wsUrl);
@@ -41,18 +66,16 @@ const useWebSocket = (path) => {
           setIsConnected(false);
         }
       );
-
-      return stompClient;
     } catch (err) {
       console.error('[WebSocket] Error in connectWebSocket:', err);
       setError(`Error connecting to WebSocket: ${err.message}`);
     }
-  }, [path]);
+  }, []);
 
   useEffect(() => {
     console.log('[WebSocket] Setting up WebSocket connection');
     const token = localStorage.getItem('jwtToken');
-    const stompClient = connectWebSocket(token);
+    connectWebSocket(token);
 
     return () => {
       console.log('[WebSocket] Cleaning up WebSocket connection');
@@ -60,7 +83,7 @@ const useWebSocket = (path) => {
         disconnect();
       }
     };
-  }, [connectWebSocket]);
+  }, [connectWebSocket, disconnect]);
 
   const sendMessage = useCallback((destination, message) => {
     if (client && isConnected) {
@@ -71,31 +94,6 @@ const useWebSocket = (path) => {
       setError('WebSocket is not connected');
     }
   }, [client, isConnected]);
-
-  const disconnect = useCallback(() => {
-    if (isDisconnectingRef.current) {
-      console.log('[WebSocket] Already disconnecting, skipping redundant call');
-      return Promise.resolve();
-    }
-    isDisconnectingRef.current = true;
-
-    return new Promise((resolve) => {
-      if (stompClientRef.current && stompClientRef.current.connected) {
-        console.log('[WebSocket] Manually disconnecting');
-        stompClientRef.current.disconnect(() => {
-          console.log('[WebSocket] Disconnected');
-          setIsConnected(false);
-          setClient(null);
-          stompClientRef.current = null;
-          isDisconnectingRef.current = false;
-          resolve();
-        });
-      } else {
-        isDisconnectingRef.current = false;
-        resolve();
-      }
-    });
-  }, []);
 
   return { isConnected, lastMessage, sendMessage, error, disconnect };
 };

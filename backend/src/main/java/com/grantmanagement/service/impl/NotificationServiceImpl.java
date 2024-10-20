@@ -7,9 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class NotificationServiceImpl implements NotificationService {
+
+    private static final Logger logger = LoggerFactory.getLogger(NotificationServiceImpl.class);
 
     @Autowired
     private JavaMailSender emailSender;
@@ -80,12 +84,20 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private void sendEmail(String to, String subject, String text) {
+        logger.info("Sending email to: {}", to);
+        logger.info("Email subject: {}", subject);
+        logger.info("Email content: {}", text);
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("noreply@grantmanagementsystem.com");
         message.setTo(to);
         message.setSubject(subject);
         message.setText(text);
-        emailSender.send(message);
+        try {
+            emailSender.send(message);
+            logger.info("Email sent successfully");
+        } catch (Exception e) {
+            logger.error("Failed to send email", e);
+        }
     }
 
     @Override
@@ -95,5 +107,27 @@ public class NotificationServiceImpl implements NotificationService {
         // Note: We need to save the updated participant to the database.
         // This should be done in the ParticipantService, so we'll assume it's handled there.
         // If not, we should inject ParticipantRepository here and save the participant.
+    }
+
+    @Override
+    public void sendDocumentSigningNotification(Agreement agreement) {
+        logger.info("Preparing document signing notification for agreement: {}", agreement.getId());
+        String subject = "Document Ready for Signing";
+        String body = String.format("Dear User,\n\nA document is ready for your signature in the Grant Agreement Management System. " +
+                        "Please log in to review and sign the document.\n\n" +
+                        "Grant ID: %d\nAgreement ID: %d\n\n" +
+                        "To sign the document, please follow these steps:\n" +
+                        "1. Log in to the Grant Agreement Management System\n" +
+                        "2. Navigate to the 'Pending Agreements' section\n" +
+                        "3. Select the agreement with ID %d\n" +
+                        "4. Review the document carefully\n" +
+                        "5. Click on the 'Sign Document' button to complete the process\n\n" +
+                        "If you have any questions or concerns, please contact our support team.\n\n" +
+                        "Best regards,\nGrant Management Team",
+                agreement.getGrant().getId(),
+                agreement.getId(),
+                agreement.getId());
+
+        sendEmail("pn.java@gmail.com", subject, body);
     }
 }

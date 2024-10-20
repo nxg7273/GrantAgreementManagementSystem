@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Heading, Table, Thead, Tbody, Tr, Th, Td, Button, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, useDisclosure, useToast } from '@chakra-ui/react';
 import axios from 'axios';
 
@@ -8,11 +8,7 @@ const AgreementManagement = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
-  useEffect(() => {
-    fetchAgreements();
-  }, []);
-
-  const fetchAgreements = async () => {
+  const fetchAgreements = useCallback(async () => {
     try {
       const response = await axios.get('/api/admin/agreements');
       setAgreements(response.data);
@@ -26,7 +22,11 @@ const AgreementManagement = () => {
         isClosable: true,
       });
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchAgreements();
+  }, [fetchAgreements]);
 
   const handleViewDetails = (agreement) => {
     setSelectedAgreement(agreement);

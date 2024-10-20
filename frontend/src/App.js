@@ -32,13 +32,7 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-function LocationLogger() {
-  const location = useLocation();
-  React.useEffect(() => {
-    console.log('Current location:', location);
-  }, [location]);
-  return null;
-}
+
 
 function AppContent() {
   const location = useLocation();
