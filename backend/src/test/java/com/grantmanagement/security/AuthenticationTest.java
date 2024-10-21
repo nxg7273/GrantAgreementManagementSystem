@@ -20,10 +20,15 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 public class AuthenticationTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationTest.class);
 
     @Autowired
     private MockMvc mockMvc;
@@ -39,27 +44,37 @@ public class AuthenticationTest {
 
     @Test
     public void testUserRegistration() throws Exception {
+        logger.info("Starting testUserRegistration");
         SignupRequest signupRequest = new SignupRequest();
         signupRequest.setUsername("testuser");
         signupRequest.setEmail("test@example.com");
         signupRequest.setPassword("password123");
 
+        logger.debug("Created SignupRequest: {}", signupRequest);
+
         when(userService.registerUser(any(SignupRequest.class))).thenReturn(new User());
+        logger.debug("Mocked userService.registerUser to return a new User");
 
         mockMvc.perform(post("/api/auth/signup")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().writeValueAsString(signupRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("User registered successfully!"));
+
+        logger.info("testUserRegistration completed successfully");
     }
 
     @Test
     public void testUserLogin() throws Exception {
+        logger.info("Starting testUserLogin");
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setUsername("testuser");
         loginRequest.setPassword("password123");
 
+        logger.debug("Created LoginRequest: {}", loginRequest);
+
         when(jwtTokenUtil.generateToken(any())).thenReturn("test-jwt-token");
+        logger.debug("Mocked jwtTokenUtil.generateToken to return 'test-jwt-token'");
 
         mockMvc.perform(post("/api/auth/signin")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -67,5 +82,7 @@ public class AuthenticationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").exists())
                 .andExpect(jsonPath("$.tokenType").value("Bearer"));
+
+        logger.info("testUserLogin completed successfully");
     }
 }

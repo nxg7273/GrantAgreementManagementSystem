@@ -2,10 +2,12 @@ package com.grantmanagement.repository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 import com.grantmanagement.model.Agreement;
 import com.grantmanagement.model.Grant;
@@ -26,10 +28,26 @@ import javax.persistence.EntityManagerFactory;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import org.hibernate.cfg.Configuration;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistry;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.mapping.PersistentClass;
+import org.hibernate.mapping.Property;
+
+import java.util.Properties;
 
 @DataJpaTest
 @Import(TestConfig.class)
 @ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestPropertySource(properties = {
+    "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect"
+})
 class AgreementRepositoryTest {
 
     private static final Logger logger = LoggerFactory.getLogger(AgreementRepositoryTest.class);
@@ -40,16 +58,32 @@ class AgreementRepositoryTest {
     @Autowired
     private AgreementRepository agreementRepository;
 
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @Autowired
+    private Environment environment;
+
     @BeforeEach
     void setUp() {
         logger.debug("Setting up test");
         logger.debug("Entity Manager: {}", entityManager);
         logger.debug("Agreement Repository: {}", agreementRepository);
 
+        // Log ApplicationContext information
+        logger.debug("ApplicationContext: {}", applicationContext);
+        logger.debug("Active profiles: {}", String.join(", ", environment.getActiveProfiles()));
+
         // Log EntityManagerFactory information
         EntityManagerFactory emf = entityManager.getEntityManager().getEntityManagerFactory();
         logger.debug("EntityManagerFactory: {}", emf);
         logger.debug("EntityManagerFactory properties: {}", emf.getProperties());
+
+        // Log Hibernate configuration
+        printHibernateConfiguration();
+
+        // Log Hibernate entity mapping information
+        printHibernateEntityMappings();
 
         // Log database connection information
         try {
@@ -86,6 +120,55 @@ class AgreementRepositoryTest {
 
         // Print database metadata
         printDatabaseMetadata();
+
+        // Log entity scanning information
+        logger.debug("Scanned entities: {}", String.join(", ", applicationContext.getBeanNamesForType(Object.class)));
+    }
+
+    private void printHibernateConfiguration() {
+        try {
+            EntityManagerFactory emf = entityManager.getEntityManager().getEntityManagerFactory();
+            SessionFactory sessionFactory = emf.unwrap(SessionFactory.class);
+            StandardServiceRegistry serviceRegistry = sessionFactory.getSessionFactoryOptions().getServiceRegistry();
+
+            Configuration configuration = new Configuration();
+            Properties properties = new Properties();
+            properties.putAll(sessionFactory.getProperties());
+            configuration.setProperties(properties);
+
+            logger.debug("Hibernate Configuration:");
+            logger.debug("Dialect: {}", configuration.getProperty("hibernate.dialect"));
+            logger.debug("Show SQL: {}", configuration.getProperty("hibernate.show_sql"));
+            logger.debug("Format SQL: {}", configuration.getProperty("hibernate.format_sql"));
+            logger.debug("HBM2DDL Auto: {}", configuration.getProperty("hibernate.hbm2ddl.auto"));
+        } catch (Exception e) {
+            logger.error("Error printing Hibernate configuration", e);
+        }
+    }
+
+    private void printHibernateEntityMappings() {
+        try {
+            EntityManagerFactory emf = entityManager.getEntityManager().getEntityManagerFactory();
+            SessionFactory sessionFactory = emf.unwrap(SessionFactory.class);
+            StandardServiceRegistry serviceRegistry = sessionFactory.getSessionFactoryOptions().getServiceRegistry();
+
+            MetadataSources metadataSources = new MetadataSources(serviceRegistry);
+            Metadata metadata = metadataSources.buildMetadata();
+
+            logger.debug("Hibernate Entity Mappings:");
+            for (PersistentClass persistentClass : metadata.getEntityBindings()) {
+                logger.debug("Entity: {}", persistentClass.getEntityName());
+                logger.debug("  Table: {}", persistentClass.getTable().getName());
+                persistentClass.getPropertyIterator().forEachRemaining(property -> {
+                    if (property instanceof Property) {
+                        Property prop = (Property) property;
+                        logger.debug("  Property: {} ({})", prop.getName(), prop.getType().getName());
+                    }
+                });
+            }
+        } catch (Exception e) {
+            logger.error("Error printing Hibernate entity mappings", e);
+        }
     }
 
     private void printDatabaseMetadata() {

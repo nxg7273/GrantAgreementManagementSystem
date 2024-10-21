@@ -1,22 +1,32 @@
 package com.grantmanagement.repository;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import com.grantmanagement.model.Grant;
 
 import java.util.List;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
+
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestPropertySource(locations = "classpath:application-test.properties")
 class GrantRepositoryTest {
 
     private static final Logger logger = LoggerFactory.getLogger(GrantRepositoryTest.class);
@@ -26,6 +36,24 @@ class GrantRepositoryTest {
 
     @Autowired
     private GrantRepository grantRepository;
+
+    @Autowired
+    private DataSource dataSource;
+
+    @BeforeEach
+    void setUp() throws SQLException {
+        logger.info("Setting up test environment for GrantRepositoryTest");
+        Connection conn = DataSourceUtils.getConnection(dataSource);
+        try {
+            logger.info("Database product name: {}", conn.getMetaData().getDatabaseProductName());
+            logger.info("Database URL: {}", conn.getMetaData().getURL());
+            logger.info("Database username: {}", conn.getMetaData().getUserName());
+        } finally {
+            DataSourceUtils.releaseConnection(conn, dataSource);
+        }
+        logger.info("EntityManager: {}", entityManager);
+        logger.info("GrantRepository: {}", grantRepository);
+    }
 
     private Grant createTestGrant(String title, Grant.GrantStatus status, BigDecimal amount) {
         Grant grant = new Grant();

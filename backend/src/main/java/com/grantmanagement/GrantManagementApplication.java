@@ -16,6 +16,11 @@ public class GrantManagementApplication {
     }
 
     @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public CommandLineRunner generatePasswordHash(BCryptPasswordEncoder passwordEncoder) {
         return args -> {
             String password = "TestPassword123!";
