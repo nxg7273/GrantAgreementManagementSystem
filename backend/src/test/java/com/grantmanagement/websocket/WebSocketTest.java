@@ -44,7 +44,7 @@ public class WebSocketTest {
 
     @Test
     public void testWebSocketConnection() throws Exception {
-        CompletableFuture<String> resultFuture = new CompletableFuture<>();
+        CompletableFuture<byte[]> resultFuture = new CompletableFuture<>();
 
         StompSession session = stompClient
                 .connect(String.format("ws://localhost:%d/ws", port), new StompSessionHandlerAdapter() {})
@@ -53,19 +53,20 @@ public class WebSocketTest {
         session.subscribe("/topic/agreements", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
-                return String.class;
+                return byte[].class;
             }
 
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
-                resultFuture.complete((String) payload);
+                resultFuture.complete((byte[]) payload);
             }
         });
 
-        session.send("/app/agreements", "Test message");
+        String testMessage = "Test message";
+        session.send("/app/agreements", testMessage.getBytes());
 
-        String result = resultFuture.get(3, TimeUnit.SECONDS);
+        byte[] result = resultFuture.get(3, TimeUnit.SECONDS);
         assertNotNull(result);
-        assertEquals("Test message", result);
+        assertEquals(testMessage, new String(result));
     }
 }

@@ -7,10 +7,10 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class WebSocketController {
 
-    @MessageMapping("/agreement")
+    @MessageMapping("/agreements")
     @SendTo("/topic/agreements")
     public String handleAgreementUpdate(String message) {
-        // Process the message and return an update
-        return "Agreement updated: " + message;
+        // Simply echo the message back without modification
+        return message;
     }
 }

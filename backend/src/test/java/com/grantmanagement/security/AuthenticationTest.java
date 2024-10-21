@@ -1,18 +1,17 @@
 package com.grantmanagement.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.grantmanagement.controller.AuthController;
 import com.grantmanagement.dto.LoginRequest;
 import com.grantmanagement.dto.SignupRequest;
-import com.grantmanagement.service.UserService;
 import com.grantmanagement.model.User;
+import com.grantmanagement.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -21,8 +20,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@SpringBootTest
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
-@WebMvcTest(AuthController.class)
 public class AuthenticationTest {
 
     @Autowired
@@ -35,13 +35,7 @@ public class AuthenticationTest {
     private UserService userService;
 
     @MockBean
-    private UserDetailsService userDetailsService;
-
-    @MockBean
     private JwtTokenUtil jwtTokenUtil;
-
-    @MockBean
-    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Test
     public void testUserRegistration() throws Exception {
@@ -67,7 +61,7 @@ public class AuthenticationTest {
 
         when(jwtTokenUtil.generateToken(any())).thenReturn("test-jwt-token");
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/auth/signin")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
