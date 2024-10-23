@@ -1,0 +1,44 @@
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+import reportWebVitals from './reportWebVitals';
+import useWebSocket from './services/WebSocketClient';
+
+console.log('React application starting...');
+
+function AppWithWebSocket() {
+  const { isConnected, lastMessage, error } = useWebSocket('/ws');
+
+  React.useEffect(() => {
+    console.log('[WebSocket] Connection status:', isConnected ? 'Connected' : 'Disconnected');
+    if (error) {
+      console.error('[WebSocket] Error:', error);
+    }
+    if (lastMessage) {
+      console.log('[WebSocket] Last message:', lastMessage);
+    }
+  }, [isConnected, lastMessage, error]);
+
+  return <App />;
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <AppWithWebSocket />
+  </React.StrictMode>
+);
+
+console.log('React application rendered.');
+
+reportWebVitals(console.log);
+
+window.onerror = function(message, source, lineno, colno, error) {
+  console.error('Global error:', { message, source, lineno, colno, error });
+};
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();

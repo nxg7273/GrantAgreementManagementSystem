@@ -1,0 +1,38 @@
+# IDE files
+.classpath
+.project
+.settings/
+
+# Logs
+*.log
+*.log.*
+
+# Build outputs
+backend/target/
+frontend/build/
+
+# Dependency directories
+node_modules/
+
+# Compiled class files
+*.class
+
+# Package files
+*.jar
+*.war
+*.ear
+
+# Other
+.DS_Store
+*.swp
+*.swo
+
+# Specific files
+PROJECT_UPDATE.md
+backend/PasswordHashGenerator.java
+frontend/build_log.txt
+frontend/frontend_startup.log
+frontend/jest.config.js
+frontend/src/components/ChakraTest.js
+frontend/src/components/ChakraTest.test.js
+package-lock.json
