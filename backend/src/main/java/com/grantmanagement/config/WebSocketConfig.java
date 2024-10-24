@@ -28,8 +28,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:3000", "http://localhost:3001", "http://100.24.44.236:3000")
+                .setAllowedOrigins("http://localhost:3000", "http://localhost:3001", "http://100.24.44.236:3000", "http://100.24.44.236")
                 .withSockJS();
+        logger.info("Registered STOMP endpoints with allowed origins: http://localhost:3000, http://localhost:3001, http://100.24.44.236:3000, http://100.24.44.236");
     }
 
     @Override
@@ -40,7 +41,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 return new WebSocketHandlerDecorator(handler) {
                     @Override
                     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-                        logger.info("New WebSocket connection established: " + session.getId());
+                        logger.info("New WebSocket connection established: " + session.getId() + ", Remote Address: " + session.getRemoteAddress());
                         super.afterConnectionEstablished(session);
                     }
                 };

@@ -37,24 +37,33 @@ const useWebSocket = () => {
 
   const connectWebSocket = useCallback((token) => {
     try {
-      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
-      console.log('[WebSocket] BACKEND_URL:', BACKEND_URL);
-      const wsUrl = `${BACKEND_URL}/ws`;
-      console.log('[WebSocket] Attempting to connect to WebSocket:', wsUrl);
+      console.log('[WebSocket] Starting connection process');
 
-      const socket = new SockJS(wsUrl);
+      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
+      console.log('[WebSocket] Using BACKEND_URL:', BACKEND_URL);
+
+      console.log('[WebSocket] Creating SockJS instance with URL:', `${BACKEND_URL}/ws`);
+      const socket = new SockJS(`${BACKEND_URL}/ws`);
+      console.log('[WebSocket] SockJS instance created');
+
+      console.log('[WebSocket] Creating Stomp client');
       const stompClient = Stomp.over(socket);
+      console.log('[WebSocket] Stomp client created');
       stompClientRef.current = stompClient;
 
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      console.log('[WebSocket] Connection headers:', headers);
 
+      console.log('[WebSocket] Initiating Stomp connection');
       stompClient.connect(headers,
         (frame) => {
           console.log('[WebSocket] Connection established successfully');
+          console.log('[WebSocket] Connection frame:', frame);
           setIsConnected(true);
           setError(null);
           setClient(stompClient);
 
+          console.log('[WebSocket] Subscribing to /topic/agreements');
           stompClient.subscribe('/topic/agreements', (message) => {
             console.log('[WebSocket] Message received:', message.body);
             setLastMessage(JSON.parse(message.body));
@@ -98,7 +107,7 @@ const useWebSocket = () => {
   return { isConnected, lastMessage, sendMessage, error, disconnect };
 };
 
+export default useWebSocket;
+
 // Add this line to log the module loading
 console.log('[WebSocket] WebSocketClient module loaded');
-
-export default useWebSocket;

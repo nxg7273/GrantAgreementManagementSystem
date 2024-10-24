@@ -18,8 +18,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "env-cmd -f .env react-scripts start",
-    "build": "react-scripts build",
+    "start": "REACT_APP_BACKEND_URL=http://100.24.44.236:8081 react-scripts start",
+    "build": "REACT_APP_BACKEND_URL=http://100.24.44.236:8081 react-scripts build",
     "test": "jest --config jest.config.js",
     "eject": "react-scripts eject"
   },
@@ -41,7 +41,6 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:8081",
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@testing-library/jest-dom": "^6.5.0",
